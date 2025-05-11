@@ -1,0 +1,208 @@
+version: '3.1'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - job-portal-net 
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, PLAINTEXT_INTERNAL:PLAINTEXT
+    networks:
+      - job-portal-net
+
+  postgres:
+    container_name: job_portal_sql
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: /var/lib/postgres/data
+    volumes:
+      - postgres:/var/lib/postgres/data
+    ports:
+      - "5433:5432"
+    networks:
+      - job-portal-net
+    restart: unless-stopped
+  
+  pgadmin:
+    container_name: job_portal_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN-CONFIG-SERVER_MODE: "false"
+    volumes:
+     - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - job-portal-net
+    restart: unless-stopped  
+    
+    
+  application-service:
+    container_name: application_microservice
+    image: application-service
+    build:
+      context: ./ms-application
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+      - kafka
+      - discovery-server
+      - gateway-service
+    networks:
+      - job-portal-net
+    ports:
+      - "8082:8082"
+    volumes:
+      - C:\Users\ASUS\Desktop\uploads:/app/uploads
+  
+    
+  discovery-server:
+    container_name: discovery_microservice
+    image: discovery-service
+    build:
+      context: ./ms-discovery
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - job-portal-net
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  
+  job-service:
+    container_name: job_microservice
+    image: job-service
+    build:
+      context: ./ms-job
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres
+      - kafka
+      - discovery-server
+      - gateway-service 
+    networks:
+      - job-portal-net
+    ports:
+      - "8081:8081"  
+    
+  
+  auth-service:
+    container_name: job_auth_microservice
+    image: job-auth-service
+    build:
+      context: ./ms-job-auth
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - job-portal-net
+    depends_on:
+      - discovery-server
+      - gateway-service
+    ports:
+      - "8070:8070"
+  
+  
+  gateway-service:
+    container_name: job_gateway
+    image: job-gateway
+    build:
+      context: ./ms-job-gateway
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - discovery-server
+    networks:
+      - job-portal-net
+    ports:
+      - "8080:8080"
+  
+  search-service:
+    container_name: job_search_microservice
+    image: job-search
+    build:
+      context: ./ms-job-search
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - discovery-server
+    networks:
+      - job-portal-net
+    ports:
+      - "8010:8010"  
+  
+  user-service:
+    container_name: user_microservice
+    image: user-service
+    build:
+      context: ./ms-job-user
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - discovery-server
+      - gateway-service
+      - postgres
+    networks:
+      - job-portal-net
+    ports:
+      - "8083:8083" 
+  
+  notification-service:
+    container_name: notification_microservice
+    image: notification-service
+    build:
+      context: ./ms-notification-job
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - discovery-server
+      - gateway-service
+      - postgres
+      - kafka
+      - mail-dev
+    networks:
+      - job-portal-net
+    ports:
+      - "8050:8050"  
+
+
+  mail-dev:
+    container_name: ms_mail_dev
+    image: maildev/maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - job-portal-net
+    
+
+networks:
+  job-portal-net:
+    driver: bridge
+volumes:
+  postgres:
+  pgadmin:

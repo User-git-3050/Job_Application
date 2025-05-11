@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UserService.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ms-application.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ms-application.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ms-job-auth.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ms-job-auth.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ms-job-search.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ms-job-search.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ms-job.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ms-job.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ms-notification-job.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ms-notification-job.main.iml" />
+    </modules>
+  </component>
+</project>

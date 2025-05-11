@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/ms-job-notification
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  kafka:
+    bootstrap-servers: kafka:29092
+
+  mail:
+    host: mail-dev
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka:password@discovery-server:8761/eureka

@@ -1,0 +1,43 @@
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+
+
+  application:
+    name: ms-application
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ms-application
+    username: postgres
+    password: root@123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: applicationEvent:com.example.msapplication.event.ApplicationEvent, jobApplicationEvent:com.example.msapplication.event.JobApplicationEvent
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+server:
+  port: 8082
+
+file:
+  upload-dir : C:\Users\ASUS\Desktop\uploads

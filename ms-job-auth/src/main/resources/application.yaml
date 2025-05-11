@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ms-job-auth
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+server:
+  port: 8070
+
+admin:
+  registration:
+    code: admin15642admin
+
+
